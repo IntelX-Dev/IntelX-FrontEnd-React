@@ -1,109 +1,69 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { ArrowLeft, User, Bell, Shield, Palette, Zap, Save, Eye, EyeOff, Moon, Sun, Users2 } from "lucide-react"
-import Sidebar from "@/components/ui/sidebar"
-import Header from "@/components/ui/header"
+import { ArrowLeft, Save, User, Bell, Shield, Palette, Zap, Users2, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import UserRoleManagement from "@/components/ui/user-role-management"
+import Sidebar from "@/components/ui/sidebar"
+import Header from "@/components/ui/header"
 import { useLanguage } from "@/lib/language-context"
-import { getCurrentUser } from "@/lib/services/auth"
+import { authService } from "@/src/services/authService"
+import type { User as UserType } from "@/src/types/auth"
 
 interface SettingsPageProps {
   onNavigate?: (screen: "dashboard" | "rfps" | "detail" | "team" | "settings") => void
   onLogout?: () => void
 }
 
-import { useRouter } from "next/navigation";
-
 export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps) {
   const { language, setLanguage, t } = useLanguage();
-  const router = useRouter();
+  
   const handleNavigate = (screen: "dashboard" | "rfps" | "detail" | "team" | "settings") => {
     if (onNavigate) {
       onNavigate(screen);
-    } else {
-      // Map screen to route
-      const routeMap: Record<string, string> = {
-        dashboard: "/dashboard",
-        rfps: "/rfps",
-        team: "/team",
-        settings: "/settings",
-      };
-      router.push(routeMap[screen] || "/dashboard");
     }
   }
+  
   const [showPassword, setShowPassword] = useState(false)
   const [darkMode, setDarkMode] = useState(false)
-  const [user, setUser] = useState<{
-    id?: number;
-    email?: string;
-    first_name?: string;
-    last_name?: string;
-    role?: string;
-  } | null>(null)
+  const [user, setUser] = useState<UserType | null>(null)
   const [loading, setLoading] = useState(true)
+  const [settings, setSettings] = useState({
+    emailNotifications: true,
+    pushNotifications: false,
+    weeklyReports: true,
+    twoFactorAuth: false,
+    publicProfile: false,
+    dataSharing: true,
+    aiProcessing: true,
+    smartSuggestions: false,
+    autoSave: true,
+  })
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUser = async () => {
       try {
-        const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null
-        if (token) {
-          const response = await getCurrentUser(token)
+        if (authService.isAuthenticated()) {
+          const response = await authService.getCurrentUser()
           if (response?.success && response?.data) {
             setUser(response.data)
-            // Update settings with user data
-            setSettings(prev => ({
-              ...prev,
-              firstName: response.data.first_name || prev.firstName,
-              lastName: response.data.last_name || prev.lastName,
-              email: response.data.email || prev.email,
-            }))
           }
         }
       } catch (error) {
-        console.error("Failed to fetch user data:", error)
+        console.error('Failed to fetch user:', error)
+        setUser(null)
       } finally {
         setLoading(false)
       }
     }
-
-    fetchUserData()
+    fetchUser()
   }, [])
-
-  const [settings, setSettings] = useState({
-    // Profile
-    firstName: user?.first_name || "John",
-    lastName: user?.last_name || "Doe", 
-    email: user?.email || "john.doe@company.com",
-    phone: "+1 (555) 123-4567",
-    position: "Senior Sales Manager",
-
-    // Notifications
-    emailNotifications: true,
-    pushNotifications: true,
-    rfpDeadlines: true,
-    teamUpdates: true,
-    weeklyReports: false,
-
-    // Security
-    twoFactorAuth: false,
-    sessionTimeout: "30",
-
-    // Preferences
-    timezone: "UTC-5",
-    dateFormat: "MM/DD/YYYY",
-
-    // AI Settings
-    aiSuggestions: true,
-    autoProcessing: false,
-    confidenceThreshold: "80",
-  })
 
   const handleSave = () => {
     console.log("Settings saved:", settings)
@@ -168,7 +128,7 @@ export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <motion.button
-                    onClick={() => onNavigate("dashboard")}
+                    onClick={() => handleNavigate("dashboard")}
                     className="p-2 rounded-xl bg-white shadow-md hover:shadow-lg text-gray-600 hover:text-gray-800 transition-all duration-300"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -185,26 +145,27 @@ export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     onClick={handleSave}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                   >
-                    <Save className="w-5 h-5 mr-2" />
+                    <Save className="w-4 h-4 mr-2" />
                     {t("saveChanges")}
                   </Button>
                 </motion.div>
               </div>
             </div>
 
+            {/* Content */}
             <div className="p-6">
               <Tabs defaultValue="profile" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-6 bg-gray-100 p-1 rounded-2xl">
+                <TabsList className="grid w-full grid-cols-6 bg-gray-50 p-1 rounded-2xl">
                   {settingsSections.map((section) => (
                     <TabsTrigger
                       key={section.id}
                       value={section.id}
-                      className="flex items-center space-x-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-xl"
+                      className="flex items-center space-x-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-xl transition-all duration-300"
                     >
                       <section.icon className="w-4 h-4" />
-                      <span className="hidden md:inline">{section.label}</span>
+                      <span className="hidden sm:inline">{section.label}</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>
@@ -212,47 +173,41 @@ export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps
                 {/* Profile Settings */}
                 <TabsContent value="profile" className="space-y-6">
                   <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 border border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("profileInfo")}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-gray-700 text-sm font-medium mb-2">{t("firstName")}</label>
-                        <Input
-                          value={settings.firstName}
-                          onChange={(e) => setSettings({ ...settings, firstName: e.target.value })}
-                          className="bg-white border-gray-200"
+                      <div className="p-4 bg-white rounded-xl border border-gray-100">
+                        <label className="block text-gray-700 text-sm font-medium mb-2">First Name</label>
+                        <Input 
+                          value={user?.first_name || ""} 
+                          onChange={(e) => setUser(prev => prev ? {...prev, first_name: e.target.value} : null)}
+                          className="bg-white border-gray-200" 
+                          placeholder="Enter your first name" 
                         />
                       </div>
-                      <div>
-                        <label className="block text-gray-700 text-sm font-medium mb-2">{t("lastName")}</label>
-                        <Input
-                          value={settings.lastName}
-                          onChange={(e) => setSettings({ ...settings, lastName: e.target.value })}
-                          className="bg-white border-gray-200"
+                      <div className="p-4 bg-white rounded-xl border border-gray-100">
+                        <label className="block text-gray-700 text-sm font-medium mb-2">Last Name</label>
+                        <Input 
+                          value={user?.last_name || ""} 
+                          onChange={(e) => setUser(prev => prev ? {...prev, last_name: e.target.value} : null)}
+                          className="bg-white border-gray-200" 
+                          placeholder="Enter your last name" 
                         />
                       </div>
-                      <div>
-                        <label className="block text-gray-700 text-sm font-medium mb-2">{t("email")}</label>
-                        <Input
-                          type="email"
-                          value={settings.email}
-                          onChange={(e) => setSettings({ ...settings, email: e.target.value })}
-                          className="bg-white border-gray-200"
+                      <div className="p-4 bg-white rounded-xl border border-gray-100">
+                        <label className="block text-gray-700 text-sm font-medium mb-2">Email</label>
+                        <Input 
+                          value={user?.email || ""} 
+                          onChange={(e) => setUser(prev => prev ? {...prev, email: e.target.value} : null)}
+                          className="bg-white border-gray-200" 
+                          placeholder="Enter your email" 
                         />
                       </div>
-                      <div>
-                        <label className="block text-gray-700 text-sm font-medium mb-2">{t("phone")}</label>
-                        <Input
-                          value={settings.phone}
-                          onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
-                          className="bg-white border-gray-200"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-gray-700 text-sm font-medium mb-2">{t("position")}</label>
-                        <Input
-                          value={settings.position}
-                          onChange={(e) => setSettings({ ...settings, position: e.target.value })}
-                          className="bg-white border-gray-200"
+                      <div className="p-4 bg-white rounded-xl border border-gray-100">
+                        <label className="block text-gray-700 text-sm font-medium mb-2">Role</label>
+                        <Input 
+                          value={user?.role || "Admin"} 
+                          disabled
+                          className="bg-gray-50 border-gray-200" 
                         />
                       </div>
                     </div>
@@ -263,40 +218,37 @@ export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps
                 <TabsContent value="notifications" className="space-y-6">
                   <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 border border-gray-100">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Notification Preferences</h3>
-                    <div className="space-y-4">
-                      {[
-                        {
-                          key: "emailNotifications",
-                          label: "Email Notifications",
-                          description: "Receive notifications via email",
-                        },
-                        {
-                          key: "pushNotifications",
-                          label: "Push Notifications",
-                          description: "Browser push notifications",
-                        },
-                        { key: "rfpDeadlines", label: "RFP Deadlines", description: "Alerts for upcoming deadlines" },
-                        {
-                          key: "teamUpdates",
-                          label: "Team Updates",
-                          description: "Notifications about team activities",
-                        },
-                        { key: "weeklyReports", label: "Weekly Reports", description: "Weekly performance summaries" },
-                      ].map((item) => (
-                        <div
-                          key={item.key}
-                          className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100"
-                        >
-                          <div>
-                            <h4 className="font-medium text-gray-900">{item.label}</h4>
-                            <p className="text-gray-600 text-sm">{item.description}</p>
-                          </div>
-                          <Switch
-                            checked={settings[item.key as keyof typeof settings] as boolean}
-                            onCheckedChange={(checked) => setSettings({ ...settings, [item.key]: checked })}
-                          />
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100">
+                        <div>
+                          <h4 className="font-medium text-gray-900">Email Notifications</h4>
+                          <p className="text-gray-600 text-sm">Receive updates via email</p>
                         </div>
-                      ))}
+                        <Switch
+                          checked={settings.emailNotifications}
+                          onCheckedChange={(checked) => setSettings({ ...settings, emailNotifications: checked })}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100">
+                        <div>
+                          <h4 className="font-medium text-gray-900">Push Notifications</h4>
+                          <p className="text-gray-600 text-sm">Get real-time updates</p>
+                        </div>
+                        <Switch
+                          checked={settings.pushNotifications}
+                          onCheckedChange={(checked) => setSettings({ ...settings, pushNotifications: checked })}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100">
+                        <div>
+                          <h4 className="font-medium text-gray-900">Weekly Reports</h4>
+                          <p className="text-gray-600 text-sm">Receive weekly summary reports</p>
+                        </div>
+                        <Switch
+                          checked={settings.weeklyReports}
+                          onCheckedChange={(checked) => setSettings({ ...settings, weeklyReports: checked })}
+                        />
+                      </div>
                     </div>
                   </div>
                 </TabsContent>
@@ -316,50 +268,21 @@ export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps
                           onCheckedChange={(checked) => setSettings({ ...settings, twoFactorAuth: checked })}
                         />
                       </div>
-
-                      <div className="p-4 bg-white rounded-xl border border-gray-100">
-                        <label className="block text-gray-700 text-sm font-medium mb-2">
-                          Session Timeout (minutes)
-                        </label>
-                        <Select
-                          value={settings.sessionTimeout}
-                          onValueChange={(value) => setSettings({ ...settings, sessionTimeout: value })}
-                        >
-                          <SelectTrigger className="bg-white border-gray-200">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="15">15 minutes</SelectItem>
-                            <SelectItem value="30">30 minutes</SelectItem>
-                            <SelectItem value="60">1 hour</SelectItem>
-                            <SelectItem value="120">2 hours</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
                       <div className="p-4 bg-white rounded-xl border border-gray-100">
                         <label className="block text-gray-700 text-sm font-medium mb-2">Change Password</label>
-                        <div className="space-y-3">
-                          <div className="relative">
-                            <Input
-                              type={showPassword ? "text" : "password"}
-                              placeholder="Current password"
-                              className="pr-12 bg-white border-gray-200"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                            >
-                              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                            </button>
-                          </div>
-                          <Input type="password" placeholder="New password" className="bg-white border-gray-200" />
+                        <div className="relative">
                           <Input
-                            type="password"
-                            placeholder="Confirm new password"
-                            className="bg-white border-gray-200"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Enter new password"
+                            className="bg-white border-gray-200 pr-10"
                           />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -386,53 +309,14 @@ export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps
                           </SelectContent>
                         </Select>
                       </div>
-
                       <div className="p-4 bg-white rounded-xl border border-gray-100">
-                        <label className="block text-gray-700 text-sm font-medium mb-2">Timezone</label>
-                        <Select
-                          value={settings.timezone}
-                          onValueChange={(value) => setSettings({ ...settings, timezone: value })}
-                        >
-                          <SelectTrigger className="bg-white border-gray-200">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="UTC-8">Pacific Time (UTC-8)</SelectItem>
-                            <SelectItem value="UTC-7">Mountain Time (UTC-7)</SelectItem>
-                            <SelectItem value="UTC-6">Central Time (UTC-6)</SelectItem>
-                            <SelectItem value="UTC-5">Eastern Time (UTC-5)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="p-4 bg-white rounded-xl border border-gray-100">
-                        <label className="block text-gray-700 text-sm font-medium mb-2">Date Format</label>
-                        <Select
-                          value={settings.dateFormat}
-                          onValueChange={(value) => setSettings({ ...settings, dateFormat: value })}
-                        >
-                          <SelectTrigger className="bg-white border-gray-200">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                            <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                            <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="p-4 bg-white rounded-xl border border-gray-100">
+                        <label className="block text-gray-700 text-sm font-medium mb-2">Theme</label>
                         <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="font-medium text-gray-900">Dark Mode</h4>
-                            <p className="text-gray-600 text-sm">Switch to dark theme</p>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Sun className="w-4 h-4 text-gray-400" />
-                            <Switch checked={darkMode} onCheckedChange={setDarkMode} />
-                            <Moon className="w-4 h-4 text-gray-400" />
-                          </div>
+                          <span className="text-gray-600 text-sm">Dark Mode</span>
+                          <Switch
+                            checked={darkMode}
+                            onCheckedChange={setDarkMode}
+                          />
                         </div>
                       </div>
                     </div>
@@ -442,55 +326,50 @@ export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps
                 {/* AI Settings */}
                 <TabsContent value="ai" className="space-y-6">
                   <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 border border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">AI Processing Settings</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">AI & Automation</h3>
                     <div className="space-y-6">
                       <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100">
                         <div>
-                          <h4 className="font-medium text-gray-900">AI Suggestions</h4>
-                          <p className="text-gray-600 text-sm">Enable AI-powered content suggestions</p>
+                          <h4 className="font-medium text-gray-900">AI Processing</h4>
+                          <p className="text-gray-600 text-sm">Enable AI-powered RFP analysis</p>
                         </div>
                         <Switch
-                          checked={settings.aiSuggestions}
-                          onCheckedChange={(checked) => setSettings({ ...settings, aiSuggestions: checked })}
+                          checked={settings.aiProcessing}
+                          onCheckedChange={(checked) => setSettings({ ...settings, aiProcessing: checked })}
                         />
                       </div>
-
                       <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100">
                         <div>
-                          <h4 className="font-medium text-gray-900">Auto Processing</h4>
-                          <p className="text-gray-600 text-sm">Automatically process incoming RFPs</p>
+                          <h4 className="font-medium text-gray-900">Smart Suggestions</h4>
+                          <p className="text-gray-600 text-sm">Get AI-powered improvement suggestions</p>
                         </div>
                         <Switch
-                          checked={settings.autoProcessing}
-                          onCheckedChange={(checked) => setSettings({ ...settings, autoProcessing: checked })}
+                          checked={settings.smartSuggestions}
+                          onCheckedChange={(checked) => setSettings({ ...settings, smartSuggestions: checked })}
                         />
                       </div>
-
-                      <div className="p-4 bg-white rounded-xl border border-gray-100">
-                        <label className="block text-gray-700 text-sm font-medium mb-2">
-                          AI Confidence Threshold ({settings.confidenceThreshold}%)
-                        </label>
-                        <input
-                          type="range"
-                          min="50"
-                          max="95"
-                          step="5"
-                          value={settings.confidenceThreshold}
-                          onChange={(e) => setSettings({ ...settings, confidenceThreshold: e.target.value })}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                        />
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                          <span>50%</span>
-                          <span>95%</span>
+                      <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100">
+                        <div>
+                          <h4 className="font-medium text-gray-900">Auto-Save</h4>
+                          <p className="text-gray-600 text-sm">Automatically save your work</p>
                         </div>
+                        <Switch
+                          checked={settings.autoSave}
+                          onCheckedChange={(checked) => setSettings({ ...settings, autoSave: checked })}
+                        />
                       </div>
                     </div>
                   </div>
                 </TabsContent>
 
-                {/* User & Role Management */}
+                {/* User Roles Settings */}
                 <TabsContent value="roles" className="space-y-6">
-                  <UserRoleManagement />
+                  <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 border border-gray-100">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">User Management</h3>
+                    <div className="p-4 bg-white rounded-xl border border-gray-100">
+                      <p className="text-gray-600">Role management features will be available here for administrators.</p>
+                    </div>
+                  </div>
                 </TabsContent>
               </Tabs>
             </div>

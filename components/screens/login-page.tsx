@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -9,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { login as authLogin, register } from "@/lib/services/auth"
+import { authService } from "@/src/services/authService"
 
 interface LoginPageProps {
   onLogin: (token?: string, refreshToken?: string, user?: any) => void
@@ -91,15 +92,11 @@ export default function LoginPage({ onLogin, onBack }: LoginPageProps) {
     }
 
     try {
-      const response = await authLogin(email, password)
+      const response = await authService.login({ email, password })
       console.log("Login successful:", response)
 
-      if (response.data?.access_token) {
-        localStorage.setItem("access_token", response.data.access_token);
-        localStorage.setItem("refresh_token", response.data.refresh_token || "");
-      }
       setIsLoading(false)
-      onLogin()
+      onLogin(response.data.access_token, response.data.refresh_token, response.data.user)
     } catch (err: any) {
       setIsLoading(false)
       console.error("Login error:", err)
@@ -162,17 +159,15 @@ export default function LoginPage({ onLogin, onBack }: LoginPageProps) {
     }
 
     try {
-      const data = await register(email, password, firstName, lastName)
-
-      if ((data as any)?.data?.access_token) {
-        localStorage.setItem("access_token", (data as any).data.access_token as string)
-      }
-      if ((data as any)?.data?.refresh_token) {
-        localStorage.setItem("refresh_token", (data as any).data.refresh_token as string)
-      }
+      const response = await authService.register({
+        email,
+        password,
+        first_name: firstName,
+        last_name: lastName,
+      })
 
       setIsLoading(false)
-      onLogin((data as any)?.access_token as string, (data as any)?.refresh_token as string, (data as any)?.user)
+      onLogin(response.data.access_token, response.data.refresh_token, response.data.user)
     } catch (err: any) {
       setIsLoading(false)
       console.error("Register error:", err)

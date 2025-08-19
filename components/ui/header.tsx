@@ -1,3 +1,4 @@
+
 "use client"
 
 import { motion } from "framer-motion"
@@ -10,29 +11,29 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useEffect, useState } from "react"
+import { authService } from "@/src/services/authService"
+import type { User as UserType } from "@/src/types/auth"
 
 interface HeaderProps {
   onLogout: () => void;
   onNavigate?: (screen: "dashboard" | "rfps" | "detail" | "team" | "settings") => void;
 }
 
-import { useEffect, useState } from "react"
-import { getCurrentUser, logout as authLogout } from "@/lib/services/auth"
-
-import { useRouter } from "next/navigation";
-
 export default function Header({ onLogout, onNavigate }: HeaderProps) {
-  const [user, setUser] = useState<{ first_name?: string; last_name?: string; email?: string } | null>(null)
+  const [user, setUser] = useState<UserType | null>(null)
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null
-        if (token) {
-          const res = await getCurrentUser(token)
-          if (res?.success && res?.data) setUser(res.data)
+        if (authService.isAuthenticated()) {
+          const response = await authService.getCurrentUser()
+          if (response?.success && response?.data) {
+            setUser(response.data)
+          }
         }
       } catch (e) {
+        console.error('Failed to fetch user:', e)
         setUser(null)
       }
     }
@@ -47,32 +48,18 @@ export default function Header({ onLogout, onNavigate }: HeaderProps) {
     : "User"
   const displayEmail = user?.email || "-"
 
-  const router = useRouter();
-
   const handleProfileClick = () => {
     if (onNavigate) {
       onNavigate("settings");
-    } else {
-      router.push("/settings");
     }
   };
 
   const handleLogout = async () => {
     try {
-      const accessToken = typeof window !== "undefined" ? localStorage.getItem("access_token") : null
-      const refreshToken = typeof window !== "undefined" ? localStorage.getItem("refresh_token") : null
-      
-      if (accessToken) {
-        await authLogout(accessToken, refreshToken || undefined)
-      }
+      await authService.logout()
     } catch (error) {
       console.error("Logout error:", error)
     } finally {
-      // Clear local storage regardless of backend call success
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("access_token")
-        localStorage.removeItem("refresh_token")
-      }
       onLogout()
     }
   };

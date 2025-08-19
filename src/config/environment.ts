@@ -1,22 +1,16 @@
 
-export const config = {
-  api: {
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE || '',
-    timeout: 10000,
-  },
-  app: {
-    name: 'Bid-Alare',
-    version: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
-    environment: process.env.NODE_ENV || 'development',
-  },
-  features: {
-    enableAnalytics: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true',
-    enableDebugMode: process.env.NODE_ENV === 'development',
-  },
-  auth: {
-    tokenExpiryBuffer: 5 * 60 * 1000, // 5 minutes in milliseconds
-  },
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE || 'https://character-individually-relationships-intelligent.trycloudflare.com';
+
+export const APP_CONFIG = {
+  name: 'Bid-Alare',
+  version: '1.0.0',
+  description: 'Where Every Bid Matters',
 };
 
-export const isDevelopment = config.app.environment === 'development';
-export const isProduction = config.app.environment === 'production';
+export const STORAGE_KEYS = {
+  ACCESS_TOKEN: 'access_token',
+  REFRESH_TOKEN: 'refresh_token',
+  USER_PREFERENCES: 'user_preferences',
+  LANGUAGE: 'language',
+  THEME: 'theme',
+};

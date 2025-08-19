@@ -1,77 +1,95 @@
 
-import { apiRequest, apiFetch } from './api';
-
-export interface User {
-  id: number;
-  email: string;
-  first_name: string;
-  last_name: string;
-  role: string | null;
-}
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-  user: User;
-}
-
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-}
+import { apiRequest } from './api';
+import type { LoginCredentials, RegisterCredentials, AuthTokens, User, LoginResponse, AuthResponse } from '../types/auth';
 
 class AuthService {
   private readonly ACCESS_TOKEN_KEY = 'access_token';
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
 
-  async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const response = await apiRequest<LoginResponse>('/api/auth/login', {
+  async login(credentials: LoginCredentials): Promise<AuthResponse<LoginResponse>> {
+    const response = await apiRequest<AuthResponse<LoginResponse>>('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
 
-    if (response.success) {
+    if (response.success && response.data) {
       this.setTokens({
         accessToken: response.data.access_token,
         refreshToken: response.data.refresh_token,
       });
     }
 
-    return response.data;
+    return response;
+  }
+
+  async register(credentials: RegisterCredentials): Promise<AuthResponse<LoginResponse>> {
+    const response = await apiRequest<AuthResponse<LoginResponse>>('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+
+    if (response.success && response.data) {
+      this.setTokens({
+        accessToken: response.data.access_token,
+        refreshToken: response.data.refresh_token,
+      });
+    }
+
+    return response;
   }
 
   async logout(): Promise<void> {
+    const accessToken = this.getAccessToken();
     const refreshToken = this.getRefreshToken();
     
     try {
-      await apiRequest('/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.getAccessToken()}`,
-        },
-        body: JSON.stringify({ 
-          refresh_token: refreshToken 
-        }),
-      });
+      if (accessToken) {
+        await apiRequest('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ 
+            refresh_token: refreshToken 
+          }),
+        });
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
     } finally {
       this.clearTokens();
     }
   }
 
-  async getCurrentUser(): Promise<User> {
-    const response = await apiRequest<User>('/api/auth/me', {
+  async getCurrentUser(): Promise<AuthResponse<User>> {
+    const response = await apiRequest<AuthResponse<User>>('/api/auth/me', {
       headers: {
         'Authorization': `Bearer ${this.getAccessToken()}`,
       },
     });
 
-    return response.data;
+    return response;
+  }
+
+  async refreshToken(): Promise<AuthResponse<{ access_token: string; refresh_token: string }>> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await apiRequest<AuthResponse<{ access_token: string; refresh_token: string }>>('/api/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+
+    if (response.success && response.data) {
+      this.setTokens({
+        accessToken: response.data.access_token,
+        refreshToken: response.data.refresh_token,
+      });
+    }
+
+    return response;
   }
 
   setTokens(tokens: AuthTokens): void {
@@ -108,3 +126,4 @@ class AuthService {
 }
 
 export const authService = new AuthService();
+export default authService;

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -11,22 +12,27 @@ import RFPDetail from "@/components/screens/rfp-detail"
 import TeamPage from "@/components/screens/team-page"
 import SettingsPage from "@/components/screens/settings-page"
 import { motion, AnimatePresence } from "framer-motion"
+import { authService } from "@/src/services/authService"
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<
     "landing" | "login" | "dashboard" | "rfps" | "detail" | "team" | "settings"
   >("landing")
   const [selectedRFP, setSelectedRFP] = useState<any>(null)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated())
 
   const handleLogin = () => {
     setIsAuthenticated(true)
     setCurrentScreen("dashboard")
   }
 
-  const handleLogout = () => {
-    setIsAuthenticated(false)
-    setCurrentScreen("landing")
+  const handleLogout = async () => {
+    try {
+      await authService.logout()
+    } finally {
+      setIsAuthenticated(false)
+      setCurrentScreen("landing")
+    }
   }
 
   const handleNavigate = (screen: "dashboard" | "rfps" | "detail" | "team" | "settings", rfp?: any) => {

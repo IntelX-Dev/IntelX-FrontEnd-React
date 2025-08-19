@@ -1,5 +1,5 @@
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE || "";
+import { API_BASE_URL } from '../config/environment';
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -8,46 +8,71 @@ export interface ApiResponse<T = any> {
   statusCode: number;
 }
 
-export async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
-  if (!API_BASE_URL) {
-    if (typeof window !== "undefined") {
-      console.warn("NEXT_PUBLIC_API_BASE is not set. Requests may fail.");
-    }
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public response?: any
+  ) {
+    super(message);
+    this.name = 'ApiError';
   }
-
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const url = `${API_BASE_URL}${normalizedPath}`;
-
-  const isFormData = typeof init?.body !== "undefined" && typeof FormData !== "undefined" && init?.body instanceof FormData;
-  const headers: HeadersInit = {
-    ...(init?.headers || {}),
-  };
-
-  const finalInit: RequestInit = {
-    ...init,
-    headers,
-  };
-
-  if (!isFormData && typeof finalInit.body === "string") {
-    const h = new Headers(headers as HeadersInit);
-    if (!h.has("Content-Type")) {
-      h.set("Content-Type", "application/json");
-    }
-    finalInit.headers = h as unknown as HeadersInit;
-  }
-
-  return fetch(url, finalInit);
 }
 
 export async function apiRequest<T = any>(
-  path: string, 
-  options?: RequestInit
-): Promise<ApiResponse<T>> {
-  const response = await apiFetch(path, options);
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+  const defaultHeaders: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  const config: RequestInit = {
+    ...options,
+    headers: {
+      ...defaultHeaders,
+      ...options.headers,
+    },
+  };
+
+  // Remove Content-Type for FormData
+  if (options.body instanceof FormData) {
+    delete (config.headers as Record<string, string>)['Content-Type'];
   }
-  
-  return response.json();
+
+  try {
+    const response = await fetch(url, config);
+    
+    if (!response.ok) {
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      let errorData = null;
+      
+      try {
+        errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        // If we can't parse JSON, use the status text
+        errorMessage = response.statusText || errorMessage;
+      }
+      
+      throw new ApiError(errorMessage, response.status, errorData);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    
+    // Network or other errors
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Network error occurred',
+      0
+    );
+  }
 }
+
+export { ApiError };
