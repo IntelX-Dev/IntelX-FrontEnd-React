@@ -19,13 +19,13 @@ interface EnhancedHeaderProps {
 
 import { useEffect, useState } from "react";
 import { authService } from "@/src/services/authService";
-
+import type { User as UserType } from "@/src/types/auth";
 import { useRouter } from "next/navigation";
 
 export default function EnhancedHeader({ onLogout }: EnhancedHeaderProps) {
   const { themeMode } = useAccessibility();
   const router = useRouter();
-  const [user, setUser] = useState<{ first_name?: string; last_name?: string; email?: string } | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
