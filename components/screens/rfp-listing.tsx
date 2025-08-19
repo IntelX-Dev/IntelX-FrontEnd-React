@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import RFPCard from "@/components/ui/rfp-card"
 import AddRFPModal from "@/components/ui/add-rfp-modal"
-import { getRFPs } from "@/lib/services/rfps"
+import { getRFPs } from "@/src/services/api"
 
 interface RFPListingProps {
   onNavigate: (screen: "dashboard" | "rfps" | "detail", rfp?: any) => void

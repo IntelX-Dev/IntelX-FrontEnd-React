@@ -75,4 +75,10 @@ export async function apiRequest<T = any>(
   }
 }
 
+// Mock RFP data service - replace with actual API calls
+export async function getRFPs(): Promise<any[]> {
+  // This is a mock implementation - replace with actual API call
+  return [];
+}
+
 export { ApiError };
