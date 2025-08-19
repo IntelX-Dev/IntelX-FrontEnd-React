@@ -1,7 +1,1 @@
-{
-  "/page": "app/page.js",
-  "/settings/page": "app/settings/page.js",
-  "/team/page": "app/team/page.js",
-  "/rfps/page": "app/rfps/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
-}
+{}
