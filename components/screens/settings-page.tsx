@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import UserRoleManagement from "@/components/ui/user-role-management"
 import { useLanguage } from "@/lib/language-context"
-import { getCurrentUser } from "@/lib/api" // Assuming getCurrentUser is in lib/api
+import { getCurrentUser } from "@/lib/services/auth"
 
 interface SettingsPageProps {
   onNavigate?: (screen: "dashboard" | "rfps" | "detail" | "team" | "settings") => void
@@ -57,6 +57,13 @@ export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps
           const response = await getCurrentUser(token)
           if (response?.success && response?.data) {
             setUser(response.data)
+            // Update settings with user data
+            setSettings(prev => ({
+              ...prev,
+              firstName: response.data.first_name || prev.firstName,
+              lastName: response.data.last_name || prev.lastName,
+              email: response.data.email || prev.email,
+            }))
           }
         }
       } catch (error) {
@@ -71,9 +78,9 @@ export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps
 
   const [settings, setSettings] = useState({
     // Profile
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@company.com",
+    firstName: user?.first_name || "John",
+    lastName: user?.last_name || "Doe", 
+    email: user?.email || "john.doe@company.com",
     phone: "+1 (555) 123-4567",
     position: "Senior Sales Manager",
 
