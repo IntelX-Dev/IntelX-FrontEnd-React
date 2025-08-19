@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button"
 import FloatingElements from "@/components/ui/floating-elements"
 
 interface LandingPageProps {
-  onGetStarted: () => void
+  onNavigate: (screen: "login" | "dashboard") => void
 }
 
-export default function LandingPage({ onGetStarted }: LandingPageProps) {
+export default function LandingPage({ onNavigate }: LandingPageProps) {
   const features = [
     {
       icon: Brain,
@@ -76,7 +76,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             <span className="text-2xl font-bold text-white">Bid-Alare</span>
           </div>
           <Button
-            onClick={onGetStarted}
+            onClick={() => onNavigate("login")}
             className="bg-white/20 backdrop-blur-xl border border-white/30 text-white hover:bg-white/30 transition-all duration-300"
           >
             Get Started
@@ -114,7 +114,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 mb-16"
           >
             <Button
-              onClick={onGetStarted}
+              onClick={() => onNavigate("login")}
               size="lg"
               className="bg-white text-purple-600 hover:bg-gray-100 font-semibold px-8 py-4 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
             >
@@ -258,7 +258,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
               Join thousands of teams already using Bid-Alare to win more business faster.
             </p>
             <Button
-              onClick={onGetStarted}
+              onClick={() => onNavigate("login")}
               size="lg"
               className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-semibold px-12 py-4 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
             >
