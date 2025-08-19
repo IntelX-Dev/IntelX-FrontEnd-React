@@ -6,7 +6,7 @@ export async function apiFetch(path: string, init?: RequestInit): Promise<Respon
     if (typeof window !== "undefined") {
       // Surface a clear error in the browser console
       // eslint-disable-next-line no-console
-      console.warn("NEXT_PUBLIC_API_BASE_URL is not set. Requests may fail.");
+      console.warn("NEXT_PUBLIC_API_BASE is not set. Requests may fail.");
     }
   }
 
