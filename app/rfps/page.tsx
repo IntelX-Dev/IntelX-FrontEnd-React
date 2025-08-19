@@ -8,7 +8,7 @@ import { LanguageProvider } from "@/lib/language-context"
 import RFPListing from "@/src/components/screens/rfp-listing"
 import { authService } from "@/src/services/authService"
 
-export default function RFPsPage() {
+export default function RFPsPageRoute() {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)

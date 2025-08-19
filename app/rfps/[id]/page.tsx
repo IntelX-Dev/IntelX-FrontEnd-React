@@ -8,38 +8,25 @@ import { LanguageProvider } from "@/lib/language-context"
 import RFPDetail from "@/src/components/screens/rfp-detail"
 import { authService } from "@/src/services/authService"
 
-export default function RFPDetailPage() {
+export default function RFPDetailPageRoute() {
   const router = useRouter()
   const params = useParams()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [rfp, setRfp] = useState(null)
 
   useEffect(() => {
     const checkAuth = () => {
       const authenticated = authService.isAuthenticated()
       setIsAuthenticated(authenticated)
+      setIsLoading(false)
       
       if (!authenticated) {
         router.push("/")
-        return
       }
-
-      // Mock RFP data - replace with actual API call
-      const mockRfp = {
-        id: params.id,
-        title: `RFP ${params.id}`,
-        company: "Sample Company",
-        status: "active",
-        deadline: "2024-12-31",
-        value: "$100,000"
-      }
-      setRfp(mockRfp)
-      setIsLoading(false)
     }
     
     checkAuth()
-  }, [router, params.id])
+  }, [router])
 
   const handleLogout = async () => {
     try {
@@ -50,26 +37,35 @@ export default function RFPDetailPage() {
     }
   }
 
-  const handleNavigate = (screen: "dashboard" | "rfps" | "detail" | "team" | "settings", rfpData?: any) => {
-    if (screen === "detail" && rfpData) {
-      router.push(`/rfps/${rfpData.id}`)
+  const handleNavigate = (screen: "dashboard" | "rfps" | "detail" | "team" | "settings", rfp?: any) => {
+    if (screen === "detail" && rfp) {
+      router.push(`/rfps/${rfp.id}`)
     } else {
       router.push(`/${screen}`)
     }
+  }
+
+  const handleBack = () => {
+    router.push("/rfps")
   }
 
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
   }
 
-  if (!isAuthenticated || !rfp) {
+  if (!isAuthenticated) {
     return null
   }
 
   return (
     <AccessibilityProvider>
       <LanguageProvider>
-        <RFPDetail rfp={rfp} onNavigate={handleNavigate} onLogout={handleLogout} />
+        <RFPDetail 
+          rfpId={params.id as string}
+          onNavigate={handleNavigate} 
+          onLogout={handleLogout}
+          onBack={handleBack}
+        />
       </LanguageProvider>
     </AccessibilityProvider>
   )

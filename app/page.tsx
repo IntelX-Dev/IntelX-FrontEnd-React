@@ -27,8 +27,8 @@ export default function HomePage() {
     checkAuth()
   }, [router])
 
-  const handleGetStarted = () => {
-    router.push("/login")
+  const handleNavigate = (screen: "login" | "dashboard") => {
+    router.push(`/${screen}`)
   }
 
   if (isLoading) {
@@ -42,7 +42,7 @@ export default function HomePage() {
   return (
     <AccessibilityProvider>
       <LanguageProvider>
-        <LandingPage onGetStarted={handleGetStarted} />
+        <LandingPage onNavigate={handleNavigate} />
       </LanguageProvider>
     </AccessibilityProvider>
   )

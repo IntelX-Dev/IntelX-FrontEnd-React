@@ -8,7 +8,7 @@ import { LanguageProvider } from "@/lib/language-context"
 import EnhancedDashboard from "@/src/components/screens/enhanced-dashboard"
 import { authService } from "@/src/services/authService"
 
-export default function DashboardPage() {
+export default function DashboardPageRoute() {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)

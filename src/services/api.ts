@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '../config/environment';
 
 export interface ApiResponse<T = any> {
@@ -24,7 +23,7 @@ export async function apiRequest<T = any>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
-  
+
   const defaultHeaders: HeadersInit = {
     'Content-Type': 'application/json',
   };
@@ -44,11 +43,11 @@ export async function apiRequest<T = any>(
 
   try {
     const response = await fetch(url, config);
-    
+
     if (!response.ok) {
       let errorMessage = `HTTP error! status: ${response.status}`;
       let errorData = null;
-      
+
       try {
         errorData = await response.json();
         errorMessage = errorData.message || errorMessage;
@@ -56,7 +55,7 @@ export async function apiRequest<T = any>(
         // If we can't parse JSON, use the status text
         errorMessage = response.statusText || errorMessage;
       }
-      
+
       throw new ApiError(errorMessage, response.status, errorData);
     }
 
@@ -66,7 +65,7 @@ export async function apiRequest<T = any>(
     if (error instanceof ApiError) {
       throw error;
     }
-    
+
     // Network or other errors
     throw new ApiError(
       error instanceof Error ? error.message : 'Network error occurred',
@@ -82,21 +81,39 @@ export async function getRFPs(): Promise<any[]> {
 }
 
 // Mock dashboard summary service - replace with actual API calls
-export async function getDashboardSummary(): Promise<any> {
-  // This is a mock implementation - replace with actual API call
-  return {
-    totalRfps: 12,
-    rfpsWon: 4,
-    pendingReview: 3,
-    winRate: 33.3,
-    total: 12,
-    won: 4,
-    pending: 3,
-    rate: 0,
-    chartData: [],
-    pieData: [],
-    recentRFPs: [],
-  };
+export async function getDashboardSummary() {
+    // This is a mock implementation - replace with actual API call
+    return {
+        totalRfps: 150,
+        activeRfps: 48,
+        completedRfps: 87,
+        pendingReviews: 15,
+        avgResponseTime: "2.3 days",
+        winRate: "68%",
+        recentActivities: [
+            {
+                id: "1",
+                type: "rfp_submitted",
+                title: "New RFP: Cloud Infrastructure Migration",
+                time: "2 hours ago",
+                user: "Sarah Chen"
+            },
+            {
+                id: "2",
+                type: "proposal_approved",
+                title: "Proposal approved for AI Analytics Platform",
+                time: "4 hours ago",
+                user: "Mike Johnson"
+            },
+            {
+                id: "3",
+                type: "rfp_deadline",
+                title: "Deadline approaching: ERP System Upgrade",
+                time: "1 day ago",
+                user: "System"
+            }
+        ]
+    }
 }
 
 // Mock getCurrentUser service - replace with actual API call

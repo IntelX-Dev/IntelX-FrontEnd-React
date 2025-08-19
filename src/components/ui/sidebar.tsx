@@ -666,7 +666,7 @@ interface SidebarProps {
 
 const menuItems: SidebarMenuItemType[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, route: "/dashboard" },
-  { id: "rfps", label: "RFP's", icon: FileText, route: "/rfps" },
+  { id: "rfps", label: "RFPs", icon: FileText, route: "/rfps" },
   { id: "team", label: "Team", icon: Users, route: "/team" },
   { id: "settings", label: "Settings", icon: Settings, route: "/settings" },
 ];
