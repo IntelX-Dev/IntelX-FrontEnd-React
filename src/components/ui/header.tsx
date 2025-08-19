@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { authService } from "@/src/services/authService"
 import type { User as UserType } from "@/src/types/auth"
 import AccessibilityControls from './accessibility-controls'
@@ -22,6 +23,7 @@ interface HeaderProps {
 
 export default function Header({ onLogout, onNavigate }: HeaderProps) {
   const [user, setUser] = useState<UserType | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -51,6 +53,8 @@ export default function Header({ onLogout, onNavigate }: HeaderProps) {
   const handleProfileClick = () => {
     if (onNavigate) {
       onNavigate("settings");
+    } else {
+      router.push("/settings");
     }
   };
 
