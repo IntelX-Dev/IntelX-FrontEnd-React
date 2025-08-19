@@ -1,4 +1,4 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE || "";
 
 // Simple wrapper around fetch that prefixes the base URL
 export async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
