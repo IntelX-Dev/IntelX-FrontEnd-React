@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { ArrowLeft, User, Bell, Shield, Palette, Zap, Save, Eye, EyeOff, Moon, Sun, Users2 } from "lucide-react"
 import Sidebar from "@/components/ui/sidebar"
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import UserRoleManagement from "@/components/ui/user-role-management"
 import { useLanguage } from "@/lib/language-context"
+import { getCurrentUser } from "@/lib/api" // Assuming getCurrentUser is in lib/api
 
 interface SettingsPageProps {
   onNavigate?: (screen: "dashboard" | "rfps" | "detail" | "team" | "settings") => void
@@ -39,6 +40,35 @@ export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps
   }
   const [showPassword, setShowPassword] = useState(false)
   const [darkMode, setDarkMode] = useState(false)
+  const [user, setUser] = useState<{
+    id?: number;
+    email?: string;
+    first_name?: string;
+    last_name?: string;
+    role?: string;
+  } | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null
+        if (token) {
+          const response = await getCurrentUser(token)
+          if (response?.success && response?.data) {
+            setUser(response.data)
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUserData()
+  }, [])
+
   const [settings, setSettings] = useState({
     // Profile
     firstName: "John",
