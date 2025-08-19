@@ -17,7 +17,7 @@ interface HeaderProps {
 }
 
 import { useEffect, useState } from "react"
-import { getCurrentUser } from "@/lib/services/auth"
+import { getCurrentUser, logout as authLogout } from "@/lib/services/auth"
 
 import { useRouter } from "next/navigation";
 
@@ -54,6 +54,26 @@ export default function Header({ onLogout, onNavigate }: HeaderProps) {
       onNavigate("settings");
     } else {
       router.push("/settings");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const accessToken = typeof window !== "undefined" ? localStorage.getItem("access_token") : null
+      const refreshToken = typeof window !== "undefined" ? localStorage.getItem("refresh_token") : null
+      
+      if (accessToken) {
+        await authLogout(accessToken, refreshToken || undefined)
+      }
+    } catch (error) {
+      console.error("Logout error:", error)
+    } finally {
+      // Clear local storage regardless of backend call success
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("access_token")
+        localStorage.removeItem("refresh_token")
+      }
+      onLogout()
     }
   };
 
@@ -106,7 +126,7 @@ export default function Header({ onLogout, onNavigate }: HeaderProps) {
                 <span>Notifications</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onLogout}>
+              <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>

@@ -18,8 +18,9 @@ interface EnhancedHeaderProps {
 }
 
 import { useEffect, useState } from "react";
+import { getCurrentUser, logout as authLogout } from "@/lib/services/auth";
+
 import { useRouter } from "next/navigation";
-import { getCurrentUser } from "@/lib/services/auth";
 
 export default function EnhancedHeader({ onLogout }: EnhancedHeaderProps) {
   const { themeMode } = useAccessibility();
@@ -42,6 +43,30 @@ export default function EnhancedHeader({ onLogout }: EnhancedHeaderProps) {
   }, []);
 
   const initials = user ? `${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`.toUpperCase() : "?";
+
+  const handleAccessibilityToggle = () => {
+    setAccessibilityMode(!accessibilityMode)
+  }
+
+  const handleLogout = async () => {
+    try {
+      const accessToken = typeof window !== "undefined" ? localStorage.getItem("access_token") : null
+      const refreshToken = typeof window !== "undefined" ? localStorage.getItem("refresh_token") : null
+
+      if (accessToken) {
+        await authLogout(accessToken, refreshToken || undefined)
+      }
+    } catch (error) {
+      console.error("Logout error:", error)
+    } finally {
+      // Clear local storage regardless of backend call success
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("access_token")
+        localStorage.removeItem("refresh_token")
+      }
+      onLogout()
+    }
+  }
 
   return (
     <motion.header
@@ -102,7 +127,7 @@ export default function EnhancedHeader({ onLogout }: EnhancedHeaderProps) {
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
               <DropdownMenuItem
-                onClick={onLogout}
+                onClick={handleLogout}
                 className="text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 <LogOut className="mr-2 h-4 w-4" />

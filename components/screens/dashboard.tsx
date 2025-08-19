@@ -44,8 +44,13 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   }
 
   const handleLogout = () => {
-    // TODO: wire to real logout when backend is ready
-    // For now, a no-op to satisfy the required prop
+    // Clear tokens and redirect to login
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("access_token")
+      localStorage.removeItem("refresh_token")
+    }
+    // This will trigger the parent component to show login page
+    window.location.reload()
   }
 
   return (
