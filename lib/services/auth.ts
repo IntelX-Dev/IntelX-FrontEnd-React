@@ -13,8 +13,48 @@ export async function login(email: string, password: string): Promise<any> {
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(text || `Login failed with status ${res.status}`);
+    let errorMessage = "Login failed. Please try again.";
+    
+    try {
+      const errorData = await res.json();
+      const message = errorData.message || errorData.error || "";
+      
+      // Handle specific error cases
+      if (res.status === 401) {
+        if (message.toLowerCase().includes('password')) {
+          errorMessage = "Incorrect password. Please try again.";
+        } else if (message.toLowerCase().includes('email') || message.toLowerCase().includes('user')) {
+          errorMessage = "No account found with this email address.";
+        } else {
+          errorMessage = "Invalid email or password. Please check your credentials.";
+        }
+      } else if (res.status === 400) {
+        if (message.toLowerCase().includes('email')) {
+          errorMessage = "Please enter a valid email address.";
+        } else if (message.toLowerCase().includes('validation')) {
+          errorMessage = "Please check your email and password format.";
+        } else {
+          errorMessage = "Invalid input. Please check your email and password.";
+        }
+      } else if (res.status === 404) {
+        errorMessage = "No account found with this email address.";
+      } else if (res.status === 429) {
+        errorMessage = "Too many login attempts. Please try again later.";
+      } else if (res.status >= 500) {
+        errorMessage = "Server error. Please try again later.";
+      }
+    } catch (e) {
+      // If we can't parse the error response, use status-based messages
+      if (res.status === 401) {
+        errorMessage = "Invalid email or password. Please check your credentials.";
+      } else if (res.status === 400) {
+        errorMessage = "Invalid input. Please check your email and password.";
+      } else if (res.status === 404) {
+        errorMessage = "No account found with this email address.";
+      }
+    }
+    
+    throw new Error(errorMessage);
   }
 
   return res.json();
@@ -42,9 +82,40 @@ export async function register(email: string, password: string, firstName: strin
   });
 
   if (!res.ok) {
-    let msg = await res.text().catch(() => "");
-    if (!msg) msg = `Registration failed with status ${res.status}`;
-    throw new Error(msg);
+    let errorMessage = "Registration failed. Please try again.";
+    
+    try {
+      const errorData = await res.json();
+      const message = errorData.message || errorData.error || "";
+      
+      // Handle specific error cases
+      if (res.status === 400) {
+        if (message.toLowerCase().includes('email') && message.toLowerCase().includes('exists')) {
+          errorMessage = "An account with this email already exists. Please try logging in instead.";
+        } else if (message.toLowerCase().includes('email') && message.toLowerCase().includes('invalid')) {
+          errorMessage = "Please enter a valid email address.";
+        } else if (message.toLowerCase().includes('password')) {
+          errorMessage = "Password must be at least 8 characters long and contain letters and numbers.";
+        } else if (message.toLowerCase().includes('validation')) {
+          errorMessage = "Please check all fields are filled correctly.";
+        } else {
+          errorMessage = "Invalid input. Please check all fields.";
+        }
+      } else if (res.status === 409) {
+        errorMessage = "An account with this email already exists. Please try logging in instead.";
+      } else if (res.status >= 500) {
+        errorMessage = "Server error. Please try again later.";
+      }
+    } catch (e) {
+      // If we can't parse the error response, use status-based messages
+      if (res.status === 400) {
+        errorMessage = "Invalid input. Please check all fields.";
+      } else if (res.status === 409) {
+        errorMessage = "An account with this email already exists.";
+      }
+    }
+    
+    throw new Error(errorMessage);
   }
 
   return res.json();

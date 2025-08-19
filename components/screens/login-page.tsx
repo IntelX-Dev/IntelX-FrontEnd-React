@@ -55,10 +55,40 @@ export default function LoginPage({ onLogin, onBack }: LoginPageProps) {
     return () => window.removeEventListener("mousemove", handleMouseMove)
   }, [mouseX, mouseY])
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
+
+    // Client-side validation
+    if (!email.trim()) {
+      setError("Please enter your email address.")
+      setIsLoading(false)
+      return
+    }
+
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address.")
+      setIsLoading(false)
+      return
+    }
+
+    if (!password.trim()) {
+      setError("Please enter your password.")
+      setIsLoading(false)
+      return
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.")
+      setIsLoading(false)
+      return
+    }
 
     try {
       const response = await authLogin(email, password)
@@ -75,7 +105,6 @@ export default function LoginPage({ onLogin, onBack }: LoginPageProps) {
       console.error("Login error:", err)
       setError(err?.message || "Login failed. Please try again.")
     }
-
   }
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -83,8 +112,51 @@ export default function LoginPage({ onLogin, onBack }: LoginPageProps) {
     setIsLoading(true)
     setError("")
 
+    // Client-side validation
+    if (!firstName.trim()) {
+      setError("Please enter your first name.")
+      setIsLoading(false)
+      return
+    }
+
+    if (!lastName.trim()) {
+      setError("Please enter your last name.")
+      setIsLoading(false)
+      return
+    }
+
+    if (!email.trim()) {
+      setError("Please enter your email address.")
+      setIsLoading(false)
+      return
+    }
+
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address.")
+      setIsLoading(false)
+      return
+    }
+
+    if (!password.trim()) {
+      setError("Please enter a password.")
+      setIsLoading(false)
+      return
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.")
+      setIsLoading(false)
+      return
+    }
+
+    if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+      setError("Password must contain both letters and numbers.")
+      setIsLoading(false)
+      return
+    }
+
     if (password !== confirmPassword) {
-      setError("Passwords don't match")
+      setError("Passwords don't match. Please try again.")
       setIsLoading(false)
       return
     }
