@@ -85,6 +85,17 @@ export async function getRFPs(): Promise<any[]> {
 export async function getDashboardSummary(): Promise<any> {
   // This is a mock implementation - replace with actual API call
   return {
+    totalRfps: 0,
+    rfpsWon: 0,
+    pendingReview: 0,
+    winRate: 0
+  };
+}
+
+// Mock dashboard summary service - replace with actual API calls
+export async function getDashboardSummary(): Promise<any> {
+  // This is a mock implementation - replace with actual API call
+  return {
     total: 0,
     won: 0,
     pending: 0,
