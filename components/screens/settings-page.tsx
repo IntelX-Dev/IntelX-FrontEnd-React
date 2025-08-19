@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -15,6 +14,7 @@ import Header from "@/components/ui/header"
 import { useLanguage } from "@/lib/language-context"
 import { authService } from "@/src/services/authService"
 import type { User as UserType } from "@/src/types/auth"
+import { getCurrentUser } from "@/src/services/api"
 
 interface SettingsPageProps {
   onNavigate?: (screen: "dashboard" | "rfps" | "detail" | "team" | "settings") => void
@@ -23,13 +23,13 @@ interface SettingsPageProps {
 
 export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps) {
   const { language, setLanguage, t } = useLanguage();
-  
+
   const handleNavigate = (screen: "dashboard" | "rfps" | "detail" | "team" | "settings") => {
     if (onNavigate) {
       onNavigate(screen);
     }
   }
-  
+
   const [showPassword, setShowPassword] = useState(false)
   const [darkMode, setDarkMode] = useState(false)
   const [user, setUser] = useState<UserType | null>(null)
@@ -50,7 +50,7 @@ export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps
     const fetchUser = async () => {
       try {
         if (authService.isAuthenticated()) {
-          const response = await authService.getCurrentUser()
+          const response = await getCurrentUser()
           if (response?.success && response?.data) {
             setUser(response.data)
           }
@@ -177,37 +177,37 @@ export default function SettingsPage({ onNavigate, onLogout }: SettingsPageProps
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="p-4 bg-white rounded-xl border border-gray-100">
                         <label className="block text-gray-700 text-sm font-medium mb-2">First Name</label>
-                        <Input 
-                          value={user?.first_name || ""} 
+                        <Input
+                          value={user?.first_name || ""}
                           onChange={(e) => setUser(prev => prev ? {...prev, first_name: e.target.value} : null)}
-                          className="bg-white border-gray-200" 
-                          placeholder="Enter your first name" 
+                          className="bg-white border-gray-200"
+                          placeholder="Enter your first name"
                         />
                       </div>
                       <div className="p-4 bg-white rounded-xl border border-gray-100">
                         <label className="block text-gray-700 text-sm font-medium mb-2">Last Name</label>
-                        <Input 
-                          value={user?.last_name || ""} 
+                        <Input
+                          value={user?.last_name || ""}
                           onChange={(e) => setUser(prev => prev ? {...prev, last_name: e.target.value} : null)}
-                          className="bg-white border-gray-200" 
-                          placeholder="Enter your last name" 
+                          className="bg-white border-gray-200"
+                          placeholder="Enter your last name"
                         />
                       </div>
                       <div className="p-4 bg-white rounded-xl border border-gray-100">
                         <label className="block text-gray-700 text-sm font-medium mb-2">Email</label>
-                        <Input 
-                          value={user?.email || ""} 
+                        <Input
+                          value={user?.email || ""}
                           onChange={(e) => setUser(prev => prev ? {...prev, email: e.target.value} : null)}
-                          className="bg-white border-gray-200" 
-                          placeholder="Enter your email" 
+                          className="bg-white border-gray-200"
+                          placeholder="Enter your email"
                         />
                       </div>
                       <div className="p-4 bg-white rounded-xl border border-gray-100">
                         <label className="block text-gray-700 text-sm font-medium mb-2">Role</label>
-                        <Input 
-                          value={user?.role || "Admin"} 
+                        <Input
+                          value={user?.role || "Admin"}
                           disabled
-                          className="bg-gray-50 border-gray-200" 
+                          className="bg-gray-50 border-gray-200"
                         />
                       </div>
                     </div>

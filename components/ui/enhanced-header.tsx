@@ -18,7 +18,7 @@ interface EnhancedHeaderProps {
 }
 
 import { useEffect, useState } from "react";
-import { getCurrentUser, logout as authLogout } from "@/lib/services/auth";
+import { getCurrentUser, logout as authLogout } from "@/src/services/authService";
 
 import { useRouter } from "next/navigation";
 

@@ -81,4 +81,41 @@ export async function getRFPs(): Promise<any[]> {
   return [];
 }
 
+// Mock dashboard summary service - replace with actual API calls
+export async function getDashboardSummary(): Promise<any> {
+  // This is a mock implementation - replace with actual API call
+  return {
+    total: 0,
+    won: 0,
+    pending: 0,
+    rate: 0,
+    chartData: [],
+    pieData: [],
+    recentRFPs: [],
+  };
+}
+
+// Mock getCurrentUser service - replace with actual API call
+export async function getCurrentUser(): Promise<any> {
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    throw new Error("No access token found");
+  }
+
+  const baseURL = process.env.NEXT_PUBLIC_API_BASE;
+  const response = await fetch(`${baseURL}/api/auth/me`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to get user info");
+  }
+
+  return response.json();
+}
+
 export { ApiError };

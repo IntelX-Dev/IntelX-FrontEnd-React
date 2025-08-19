@@ -7,7 +7,7 @@ import Header from "@/components/ui/header"
 import KPICard from "@/components/ui/kpi-card"
 import AnimatedChart from "@/components/ui/animated-chart"
 import F1GridRFPs from "@/components/ui/f1-grid-rfps"
-import { getDashboardSummary } from "@/lib/services/rfps"
+import { getDashboardSummary } from "@/src/services/api"
 
 interface DashboardProps {
   onNavigate: (screen: "dashboard" | "rfps" | "detail", rfp?: any) => void

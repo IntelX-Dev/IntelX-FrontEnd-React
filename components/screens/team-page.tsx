@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import AddTeamMemberModal from "@/components/ui/add-team-member-modal"
-import { teamData } from "@/lib/team-data"
+import { teamData } from "@/src/data/team-data"
 
 interface TeamPageProps {
   onNavigate: (screen: "dashboard" | "rfps" | "detail" | "team" | "settings") => void

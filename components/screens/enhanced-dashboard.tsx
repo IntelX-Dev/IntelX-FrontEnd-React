@@ -8,7 +8,7 @@ import KPICard from "@/components/ui/kpi-card"
 import AccessibleAnimatedChart from "@/components/ui/accessible-animated-chart"
 import AccessibleF1GridRFPs from "@/components/ui/accessible-f1-grid-rfps"
 import { useAccessibility } from "@/lib/accessibility-context"
-import { getDashboardSummary } from "@/lib/services/rfps"
+import { getDashboardSummary } from "@/src/services/api"
 
 interface EnhancedDashboardProps {
   onNavigate: (screen: "dashboard" | "rfps" | "detail" | "team" | "settings", rfp?: any) => void
