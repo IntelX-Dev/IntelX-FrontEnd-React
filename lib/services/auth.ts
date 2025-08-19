@@ -5,7 +5,7 @@ export interface LoginResponse {
   [key: string]: unknown;
 }
 
-export async function login(email: string, password: string): Promise<LoginResponse> {
+export async function login(email: string, password: string): Promise<any> {
   const res = await apiFetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -74,6 +74,12 @@ export async function getCurrentUser(accessToken: string): Promise<any> {
     method: "GET",
     headers,
   });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `Failed to get user info with status ${res.status}`);
+  }
+
   return res.json();
 }
 

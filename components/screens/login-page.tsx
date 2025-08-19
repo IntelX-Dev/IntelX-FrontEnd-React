@@ -61,14 +61,15 @@ export default function LoginPage({ onLogin, onBack }: LoginPageProps) {
     setError("")
 
     try {
-      const data = await authLogin(email, password)
-      console.log("Login successful:", data)
+      const response = await authLogin(email, password)
+      console.log("Login successful:", response)
 
-      if (data.access_token) {
-        localStorage.setItem("token", data.access_token);
+      if (response.data?.access_token) {
+        localStorage.setItem("access_token", response.data.access_token);
+        localStorage.setItem("refresh_token", response.data.refresh_token || "");
       }
       setIsLoading(false)
-      onLogin(data.access_token as string, (data as any)?.refresh_token as string, (data as any)?.user)
+      onLogin()
     } catch (err: any) {
       setIsLoading(false)
       console.error("Login error:", err)
@@ -91,11 +92,11 @@ export default function LoginPage({ onLogin, onBack }: LoginPageProps) {
     try {
       const data = await register(email, password, firstName, lastName)
 
-      if ((data as any)?.access_token) {
-        localStorage.setItem("token", (data as any).access_token as string)
+      if ((data as any)?.data?.access_token) {
+        localStorage.setItem("access_token", (data as any).data.access_token as string)
       }
-      if ((data as any)?.refresh_token) {
-        localStorage.setItem("refreshToken", (data as any).refresh_token as string)
+      if ((data as any)?.data?.refresh_token) {
+        localStorage.setItem("refresh_token", (data as any).data.refresh_token as string)
       }
 
       setIsLoading(false)
