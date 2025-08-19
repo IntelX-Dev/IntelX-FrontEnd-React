@@ -53,10 +53,6 @@ export default function RFPsPageRoute() {
   }
 
   return (
-    <AccessibilityProvider>
-      <LanguageProvider>
-        <RFPListing onNavigate={handleNavigate} onLogout={handleLogout} />
-      </LanguageProvider>
-    </AccessibilityProvider>
+    <RFPListing onNavigate={handleNavigate} onLogout={handleLogout} />
   )
 }

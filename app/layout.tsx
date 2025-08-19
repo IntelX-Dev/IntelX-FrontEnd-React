@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 }
 
 import { LanguageProvider } from "@/lib/language-context";
+import { AccessibilityProvider } from "@/lib/accessibility-context";
 
 export default function RootLayout({
   children,
@@ -28,7 +29,9 @@ html {
         `}</style>
       </head>
       <body>
-        <LanguageProvider>{children}</LanguageProvider>
+        <AccessibilityProvider>
+          <LanguageProvider>{children}</LanguageProvider>
+        </AccessibilityProvider>
       </body>
     </html>
   )

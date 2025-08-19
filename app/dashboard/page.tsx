@@ -53,10 +53,6 @@ export default function DashboardPageRoute() {
   }
 
   return (
-    <AccessibilityProvider>
-      <LanguageProvider>
-        <EnhancedDashboard onNavigate={handleNavigate} onLogout={handleLogout} />
-      </LanguageProvider>
-    </AccessibilityProvider>
+    <EnhancedDashboard onNavigate={handleNavigate} onLogout={handleLogout} />
   )
 }

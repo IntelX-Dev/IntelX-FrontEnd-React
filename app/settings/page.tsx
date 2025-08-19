@@ -53,10 +53,6 @@ export default function SettingsPageRoute() {
   }
 
   return (
-    <AccessibilityProvider>
-      <LanguageProvider>
-        <SettingsPage onNavigate={handleNavigate} onLogout={handleLogout} />
-      </LanguageProvider>
-    </AccessibilityProvider>
+    <SettingsPage onNavigate={handleNavigate} onLogout={handleLogout} />
   )
 }

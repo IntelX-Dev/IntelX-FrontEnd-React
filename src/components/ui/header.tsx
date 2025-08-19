@@ -1,4 +1,3 @@
-
 "use client"
 
 import { motion } from "framer-motion"
@@ -14,6 +13,7 @@ import {
 import { useEffect, useState } from "react"
 import { authService } from "@/src/services/authService"
 import type { User as UserType } from "@/src/types/auth"
+import AccessibilityControls from './accessibility-controls'
 
 interface HeaderProps {
   onLogout: () => void;
@@ -79,6 +79,9 @@ export default function Header({ onLogout, onNavigate }: HeaderProps) {
         </div>
 
         <div className="flex items-center space-x-4">
+          {/* Accessibility Controls */}
+          <AccessibilityControls />
+
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
