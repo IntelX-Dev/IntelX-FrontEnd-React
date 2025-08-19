@@ -18,7 +18,7 @@ interface EnhancedHeaderProps {
 }
 
 import { useEffect, useState } from "react";
-import { getCurrentUser, logout as authLogout } from "@/src/services/authService";
+import { authService } from "@/src/services/authService";
 
 import { useRouter } from "next/navigation";
 
@@ -30,40 +30,36 @@ export default function EnhancedHeader({ onLogout }: EnhancedHeaderProps) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-        if (token) {
-          const res = await getCurrentUser(token);
-          if (res?.success && res?.data) setUser(res.data);
+        if (authService.isAuthenticated()) {
+          const response = await authService.getCurrentUser();
+          if (response?.success && response?.data) {
+            setUser(response.data);
+          }
         }
       } catch (e) {
+        console.error('Failed to fetch user:', e);
         setUser(null);
       }
     };
     fetchUser();
   }, []);
 
-  const initials = user ? `${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`.toUpperCase() : "?";
+  const initials = user
+    ? (user.first_name?.[0] || "") + (user.last_name?.[0] || "")
+    : "?"
+  const displayName = user
+    ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "User"
+    : "User"
+  const displayEmail = user?.email || "-"
 
-  const handleAccessibilityToggle = () => {
-    setAccessibilityMode(!accessibilityMode)
-  }
+  
 
   const handleLogout = async () => {
     try {
-      const accessToken = typeof window !== "undefined" ? localStorage.getItem("access_token") : null
-      const refreshToken = typeof window !== "undefined" ? localStorage.getItem("refresh_token") : null
-
-      if (accessToken) {
-        await authLogout(accessToken, refreshToken || undefined)
-      }
+      await authService.logout()
     } catch (error) {
       console.error("Logout error:", error)
     } finally {
-      // Clear local storage regardless of backend call success
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("access_token")
-        localStorage.removeItem("refresh_token")
-      }
       onLogout()
     }
   }
@@ -112,8 +108,8 @@ export default function EnhancedHeader({ onLogout }: EnhancedHeaderProps) {
             >
               <div className="flex items-center justify-start gap-2 p-2">
                 <div className="flex flex-col space-y-1 leading-none">
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() : "-"}</p>
-<p className="w-[200px] truncate text-sm text-gray-600 dark:text-gray-400">{user?.email || "-"}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{displayName}</p>
+                  <p className="w-[200px] truncate text-sm text-gray-600 dark:text-gray-400">{displayEmail}</p>
                 </div>
               </div>
               <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
