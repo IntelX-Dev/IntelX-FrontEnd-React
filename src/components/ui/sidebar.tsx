@@ -651,7 +651,7 @@ function SidebarMenuSubButton({
   )
 }
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 interface SidebarMenuItemType {
   id: string;
@@ -661,7 +661,7 @@ interface SidebarMenuItemType {
 }
 
 interface SidebarProps {
-  activeItem: string;
+  activeItem?: string;
 }
 
 const menuItems: SidebarMenuItemType[] = [
@@ -673,6 +673,8 @@ const menuItems: SidebarMenuItemType[] = [
 
 export default function MainSidebar({ activeItem }: SidebarProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  
   return (
     <motion.div
       initial={{ x: -300 }}
@@ -693,7 +695,7 @@ export default function MainSidebar({ activeItem }: SidebarProps) {
         <nav className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon
-            const isActive = activeItem === item.id
+            const isActive = activeItem === item.id || pathname === item.route || pathname.startsWith(item.route + '/')
 
             return (
               <motion.button
